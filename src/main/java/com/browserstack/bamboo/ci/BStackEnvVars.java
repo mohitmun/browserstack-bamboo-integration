@@ -7,5 +7,6 @@ public final class BStackEnvVars
   public static final String BSTACK_LOCAL_ENABLED = "BROWSERSTACK_LOCAL";
   public static final String BSTACK_LOCAL_ARGS = "BROWSERSTACK_LOCAL_ARGS";
   public static final String BSTACK_LOCAL_IDENTIFIER = "BROWSERSTACK_LOCAL_IDENTIFIER";
+  public static final String BSTACK_DISABLE_ENV_VARS = "BROWSERSTACK_DISABLE_ENV_VARS";
 
 }

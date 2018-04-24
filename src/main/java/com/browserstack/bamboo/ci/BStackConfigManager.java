@@ -47,6 +47,14 @@ public class BStackConfigManager {
   public String getAccessKey(){
     return get(BStackEnvVars.BSTACK_ACCESS_KEY); 
   }
+  
+  public Boolean disableEnvVar(){
+	String disableEnv = get(BStackEnvVars.BSTACK_DISABLE_ENV_VARS);
+	if (disableEnv != null && disableEnv.equals("true"))
+	  return true;
+	else
+      return false;
+  }
 
   public String get(String key) {
     String adminValue = adminConfig.getSystemProperty(key);

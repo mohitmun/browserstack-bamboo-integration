@@ -104,6 +104,7 @@ public class BuildConfigurator extends BaseConfigurableBuildPlugin implements Cu
       context.put("browserstack_access_key_key", contextPrefix + BStackEnvVars.BSTACK_ACCESS_KEY);
       context.put("browserstack_local_enabled_key", contextPrefix + BStackEnvVars.BSTACK_LOCAL_ENABLED);
       context.put("browserstack_local_args_key", contextPrefix + BStackEnvVars.BSTACK_LOCAL_ARGS); 
+      context.put("browserstack_disable_env_vars", contextPrefix + BStackEnvVars.BSTACK_DISABLE_ENV_VARS);
     }
 
     public AdministrationConfigurationAccessor getAdministrationConfigurationAccessor() {

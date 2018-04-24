@@ -1,59 +1,41 @@
 package com.browserstack.bamboo.ci;
 
-import org.junit.Test;
-import org.junit.Before;
-import com.atlassian.bamboo.variable.VariableContext;
-import com.atlassian.bamboo.variable.VariableContextImpl;
-import com.atlassian.bamboo.variable.VariableDefinitionContext;
-import com.atlassian.bamboo.variable.VariableType;
-import com.atlassian.bamboo.configuration.AdministrationConfiguration;
-import com.atlassian.bamboo.configuration.AdministrationConfigurationManager;
-import com.atlassian.bamboo.buildqueue.manager.CustomPreBuildQueuedAction;
-import com.atlassian.bamboo.v2.build.BaseConfigurableBuildPlugin;
-import com.atlassian.bamboo.v2.build.BuildContext;
-import com.atlassian.bamboo.task.TaskDefinition;
-import com.atlassian.bamboo.process.EnvironmentVariableAccessorImpl;
-import com.atlassian.bamboo.process.EnvironmentVariableAccessor;
-import com.atlassian.sal.api.component.ComponentLocator;
-import com.browserstack.bamboo.ci.BStackEnvVars;
-import com.atlassian.bamboo.build.BuildDefinition;
-import com.browserstack.bamboo.ci.BStackConfigManager;
-import com.browserstack.bamboo.ci.singletons.BrowserStackLocalSingleton;
-import com.browserstack.bamboo.ci.local.BambooBrowserStackLocal;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.junit.runner.RunWith;
-import org.apache.commons.lang.StringUtils;
-import java.util.*;
-import com.atlassian.bamboo.configuration.AdministrationConfiguration;
-import com.atlassian.bamboo.configuration.AdministrationConfigurationAccessor;
-import com.atlassian.bamboo.configuration.AdministrationConfigurationImpl;
-import com.atlassian.bamboo.configuration.AdministrationConfigurationManager;
-import com.atlassian.bamboo.build.BuildDefinition;
-import com.browserstack.bamboo.ci.BStackConfigManager;
-import com.atlassian.bamboo.ResultKey;
-import com.browserstack.bamboo.ci.BStackEnvVars;
-import com.atlassian.bamboo.v2.build.BuildContext;
-import com.browserstack.bamboo.ci.singletons.BrowserStackLocalSingleton;
-import com.browserstack.bamboo.ci.local.BambooBrowserStackLocal;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import com.atlassian.spring.container.ContainerManager;
-import com.atlassian.bamboo.build.BuildLoggerManager;
-import com.atlassian.bamboo.build.logger.BuildLogger;
-import com.atlassian.bamboo.build.logger.LogInterceptorStack;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import com.atlassian.bandana.BandanaManager;
-import com.atlassian.bandana.DefaultBandanaManager;
-import com.atlassian.bandana.impl.MemoryBandanaPersister;
-
-
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import com.atlassian.bamboo.ResultKey;
+import com.atlassian.bamboo.build.BuildDefinition;
+import com.atlassian.bamboo.build.BuildLoggerManager;
+import com.atlassian.bamboo.build.logger.BuildLogger;
+import com.atlassian.bamboo.configuration.AdministrationConfiguration;
+import com.atlassian.bamboo.configuration.AdministrationConfigurationImpl;
+import com.atlassian.bamboo.configuration.AdministrationConfigurationManager;
+import com.atlassian.bamboo.process.EnvironmentVariableAccessor;
+import com.atlassian.bamboo.process.EnvironmentVariableAccessorImpl;
+import com.atlassian.bamboo.task.TaskDefinition;
+import com.atlassian.bamboo.v2.build.BuildContext;
+import com.atlassian.bamboo.variable.VariableContext;
+import com.atlassian.bamboo.variable.VariableContextImpl;
+import com.atlassian.bamboo.variable.VariableDefinitionContext;
+import com.atlassian.bandana.BandanaManager;
+import com.atlassian.bandana.DefaultBandanaManager;
+import com.atlassian.bandana.impl.MemoryBandanaPersister;
+import com.atlassian.sal.api.component.ComponentLocator;
 
 /*
   Tests to see if the Bamboo Variables and the Environment Variables are properly populated.
@@ -99,11 +81,9 @@ public class BStackEnvironmentConfiguratorTest {
 
     when(definition.getConfiguration()).thenReturn(updatedConfiguration);
 
-     ArrayList<TaskDefinition> taskDefinitions = new ArrayList<TaskDefinition>();
+    ArrayList<TaskDefinition> taskDefinitions = new ArrayList<TaskDefinition>();
 
     taskDefinitions.add(definition);
-
-
     Map<String, String> customConfiguration = new HashMap<>();
 
     buildDefinition = mock(BuildDefinition.class);
@@ -134,7 +114,6 @@ public class BStackEnvironmentConfiguratorTest {
   public void shouldSetTheBambooVariablesToEnvironmentVariablesMap() {
 
     buildDefinition.getCustomConfiguration().put("custom.browserstack.override", "true");
-
     buildDefinition.getCustomConfiguration().put("custom.browserstack." + BStackEnvVars.BSTACK_USERNAME, "JABBA");
     buildDefinition.getCustomConfiguration().put("custom.browserstack." + BStackEnvVars.BSTACK_ACCESS_KEY, "JABBA_KEY");
 
@@ -157,7 +136,6 @@ public class BStackEnvironmentConfiguratorTest {
     buildDefinition.getCustomConfiguration().put("custom.browserstack." + BStackEnvVars.BSTACK_LOCAL_ENABLED, "true");
     buildDefinition.getCustomConfiguration().put("custom.browserstack." + BStackEnvVars.BSTACK_LOCAL_ARGS, "1234");
     buildDefinition.getCustomConfiguration().put("custom.browserstack." + BStackEnvVars.BSTACK_LOCAL_IDENTIFIER, "bot_blink_soulring_bottle_dagon_etherealblade_bloodstone_backpack_gg");
-
 
     environmentConfigurator.call();
     
@@ -233,5 +211,29 @@ public class BStackEnvironmentConfiguratorTest {
     assertNull(variableContext.getEffectiveVariables().get(BStackEnvVars.BSTACK_LOCAL_ARGS));
     assertNull(variableContext.getEffectiveVariables().get(BStackEnvVars.BSTACK_LOCAL_IDENTIFIER));
   }
+  
+  @Test
+  public void shouldNotSetBrowserstackEnvVariablesToBuildPathIfDisabledFromPlan() {
+
+    buildDefinition.getCustomConfiguration().put("custom.browserstack.override", "true");
+    buildDefinition.getCustomConfiguration().put("custom.browserstack." + BStackEnvVars.BSTACK_DISABLE_ENV_VARS, "true");
+    buildDefinition.getCustomConfiguration().put("custom.browserstack." + BStackEnvVars.BSTACK_USERNAME, "JABBA");
+    buildDefinition.getCustomConfiguration().put("custom.browserstack." + BStackEnvVars.BSTACK_ACCESS_KEY, "JABBA_KEY");
+    environmentConfigurator.call();
+    assertNull(definition.getConfiguration().get("environmentVariables"));
+  }
+  
+  @Test
+  public void shouldNotSetBrowserstackEnvVariablesToBuildPathIfDisabledFromAdmin() {
+
+    buildDefinition.getCustomConfiguration().put("custom.browserstack.override", "false");
+    administrationConfiguration.setSystemProperty(BStackEnvVars.BSTACK_DISABLE_ENV_VARS, "true");
+    administrationConfiguration.setSystemProperty(BStackEnvVars.BSTACK_USERNAME, "ADMIN_JABBA");
+    administrationConfiguration.setSystemProperty(BStackEnvVars.BSTACK_ACCESS_KEY, "ADMIN_JABBA_KEY");
+    administrationConfiguration.setSystemProperty(BStackEnvVars.BSTACK_LOCAL_ENABLED, "false");
+    environmentConfigurator.call();
+    assertNull(definition.getConfiguration().get("environmentVariables"));
+  }
+  
 
 }

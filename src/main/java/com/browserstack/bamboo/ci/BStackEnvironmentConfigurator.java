@@ -55,7 +55,8 @@ public class BStackEnvironmentConfigurator extends BaseConfigurableBuildPlugin i
       BStackConfigManager configManager = new BStackConfigManager(adminConfig, buildContext.getBuildDefinition().getCustomConfiguration(), bandanaManager);
 
       if(configManager.hasCredentials()) {
-        addEnvVarsToPlan();
+    	if(!configManager.disableEnvVar())
+    		addEnvVarsToPlan();
 
         injectVariable(buildContext, BStackEnvVars.BSTACK_USERNAME, configManager.get(BStackEnvVars.BSTACK_USERNAME) + "-bamboo");
         injectVariable(buildContext, BStackEnvVars.BSTACK_ACCESS_KEY, configManager.get(BStackEnvVars.BSTACK_ACCESS_KEY));
@@ -72,10 +73,10 @@ public class BStackEnvironmentConfigurator extends BaseConfigurableBuildPlugin i
         Map<String, String> returnedMap = environmentVariableAccessor.splitEnvironmentAssignments(originalEnv, false);        
         
         Map<String, String> origMap = new HashMap<>();
-    	for(Entry<String, String> entry: returnedMap.entrySet())
-    	{
-    		origMap.put(entry.getKey(), "\"" + entry.getValue() +"\"" );
-    	}
+      	for(Entry<String, String> entry: returnedMap.entrySet())
+      	{
+      		origMap.put(entry.getKey(), "\"" + entry.getValue() +"\"" );
+      	}
     	
         origMap.put(BStackEnvVars.BSTACK_USERNAME, "\"${bamboo." + BStackEnvVars.BSTACK_USERNAME + "}\"");
         origMap.put(BStackEnvVars.BSTACK_ACCESS_KEY, "\"${bamboo." + BStackEnvVars.BSTACK_ACCESS_KEY + "}\"");

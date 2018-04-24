@@ -9,6 +9,7 @@
         [@ui.bambooSection dependsOn='${browserstack_local_enabled_key}' showOn='true']
             [@ww.textfield name="${browserstack_local_args_key}" label='Modifiers' description='Any additional <a target="_blank" href="https://www.browserstack.com/local-testing#modifiers">configuration options</a>.(Optional)' /]
         [/@ui.bambooSection]
+        [@ww.checkbox label='Disable BrowserStack Environment Variables' name='${browserstack_disable_env_vars}' toggle='true' description='By checking this box, you will disable BrowserStack specific environment variables, like the username and access key, which are appended to any environment variables you already pass' /]
     [/@ui.bambooSection]
   [/@ui.bambooSection]
 [/@ui.bambooSection]
