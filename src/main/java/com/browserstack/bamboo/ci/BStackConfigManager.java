@@ -36,8 +36,20 @@ public class BStackConfigManager {
     return (StringUtils.isNotBlank(get(BStackEnvVars.BSTACK_USERNAME)) && StringUtils.isNotBlank(get(BStackEnvVars.BSTACK_ACCESS_KEY)));
   }
 
+  public boolean hasAppAutomateBuildPath(){
+    return StringUtils.isNotBlank(buildConfig.get("custom.browserstack.app_build_path"));
+  }
+
+  public String getAppBuildPath(){
+    return buildConfig.get("custom.browserstack.app_build_path");
+  }
+
   public boolean localEnabled() {
     return (get(BStackEnvVars.BSTACK_LOCAL_ENABLED) != null && get(BStackEnvVars.BSTACK_LOCAL_ENABLED).equals("true"));
+  }
+
+  public boolean isAppAutomateEnabled() {
+    return StringUtils.isNotBlank(buildConfig.get("custom.browserstack.app_automate")) && buildConfig.get("custom.browserstack.app_automate").equals("true"); 
   }
 
   public String getUsername() {
