@@ -21,6 +21,10 @@ import com.atlassian.bamboo.build.logger.BuildLogger;
 import com.atlassian.bandana.BandanaManager;
 import java.util.Arrays;
 import java.util.Map;
+import com.browserstack.appautomate.AppAutomateClient;
+import com.browserstack.automate.exception.AppAutomateException;
+import java.io.FileNotFoundException;
+import com.browserstack.automate.exception.InvalidFileExtensionException;
 
 /*
   This configures the Job level BrowserStack settings. And starts the Local Binary if required.
@@ -48,6 +52,9 @@ public class BuildConfigurator extends BaseConfigurableBuildPlugin implements Cu
       if(configManager.hasCredentials()) {
         if(configManager.localEnabled()) {
           startLocal();
+        }
+        if(configManager.isAppAutomateEnabled()) {
+          enableAppAutomate();
         }
       }
       
@@ -79,7 +86,36 @@ public class BuildConfigurator extends BaseConfigurableBuildPlugin implements Cu
         buildLogger.addBuildLogEntry("Exception while starting the BrowserStackLocal Binary : " + e.toString());
         throw new RuntimeException("Exception while starting the BrowserStackLocal Binary : " + e.toString());
       }
+  }
 
+  private void enableAppAutomate(){
+    BuildLoggerManager buildLoggerManager = (BuildLoggerManager) ContainerManager.getComponent("buildLoggerManager");
+    BuildLogger buildLogger = buildLoggerManager.getLogger(buildContext.getResultKey());
+    buildLogger.addBuildLogEntry("App automate support is enabled");
+    if (configManager.hasAppAutomateBuildPath()) {
+      String buildPath = configManager.getAppBuildPath();
+      buildLogger.addBuildLogEntry("App build path:" + buildPath);
+      try{
+        String app_id = uploadFile(buildPath);
+        buildLogger.addBuildLogEntry("Browsestack binary uploaded app_id:" + app_id);
+        injectVariable(buildContext, BStackEnvVars.BSTACK_APP_ID, app_id);
+      }catch(AppAutomateException appAutomateException){
+        buildLogger.addBuildLogEntry("AppAutomateException occured");
+      }catch(FileNotFoundException fileNotFoundException){
+        buildLogger.addBuildLogEntry("FileNotFoundException occured");
+      }catch(InvalidFileExtensionException invalidFileExtensionException){
+        buildLogger.addBuildLogEntry("InvalidFileExtensionException occured");
+      }
+    } else {
+      buildLogger.addBuildLogEntry("App build path is not available");
+    }
+  }
+ 
+    public String uploadFile(String appPath) throws AppAutomateException, FileNotFoundException, InvalidFileExtensionException {
+        String userName = configManager.get(BStackEnvVars.BSTACK_USERNAME);
+        String accessKey = configManager.get(BStackEnvVars.BSTACK_ACCESS_KEY);
+        AppAutomateClient appAutomateClient = new AppAutomateClient(userName, accessKey);
+        return appAutomateClient.uploadApp(appPath).getAppUrl();
     }
 
     private void injectVariable(BuildContext buildContext, String key, String value) {

@@ -82,6 +82,7 @@ public class BStackEnvironmentConfigurator extends BaseConfigurableBuildPlugin i
         origMap.put(BStackEnvVars.BSTACK_ACCESS_KEY, "\"${bamboo." + BStackEnvVars.BSTACK_ACCESS_KEY + "}\"");
         origMap.put(BStackEnvVars.BSTACK_LOCAL_ENABLED, "\"${bamboo." + BStackEnvVars.BSTACK_LOCAL_ENABLED + "}\"");
         origMap.put(BStackEnvVars.BSTACK_LOCAL_IDENTIFIER, "\"${bamboo." + BStackEnvVars.BSTACK_LOCAL_IDENTIFIER + "}\"");
+        origMap.put(BStackEnvVars.BSTACK_APP_ID, "\"${bamboo." + BStackEnvVars.BSTACK_APP_ID + "}\"");
 
         environmentVariableAccessor = new EnvironmentVariableAccessorImpl(null, null);
         String modifiedVars = environmentVariableAccessor.joinEnvironmentVariables(origMap);
