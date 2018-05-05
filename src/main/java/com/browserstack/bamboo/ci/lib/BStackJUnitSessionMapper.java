@@ -14,11 +14,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import java.util.HashMap;
-import com.browserstack.automate.AutomateClient;
 import com.browserstack.automate.model.Session;
-import com.browserstack.automate.exception.AutomateException;
-import com.browserstack.automate.exception.SessionNotFound;
 import com.browserstack.bamboo.ci.lib.BStackDirectoryScanner;
+import com.browserstack.client.exception.BrowserStackException;
+import com.browserstack.client.BrowserStackClient;
 
 
 
@@ -33,16 +32,15 @@ public class BStackJUnitSessionMapper {
 
   private String baseDir;
   private Map<String, String> testSessionMap;
-  private AutomateClient automateClient;
+  private BrowserStackClient bStackClient;
   public List<BStackSession> bStackSessions;
   private static final String pattern = "**/surefire-reports/TEST-*.xml";
 
-
-  public BStackJUnitSessionMapper(String baseDir, Map<String, String> testSessionMap, AutomateClient automateClient) {
+  public BStackJUnitSessionMapper(String baseDir, Map<String, String> testSessionMap, BrowserStackClient bStackClient) {
     this.baseDir = baseDir;
     this.testSessionMap = testSessionMap;
     this.bStackSessions = new ArrayList<BStackSession>();
-    this.automateClient = automateClient;
+    this.bStackClient = bStackClient;
   }
 
   public List<BStackSession> parseAndMapJUnitXMLReports() {
@@ -86,11 +84,9 @@ public class BStackJUnitSessionMapper {
             String exceptionEncountered = "";
 
             try {
-                activeSession = automateClient.getSession(bStackSessionId);
-            } catch (AutomateException aex) {
+                activeSession = bStackClient.getSession(bStackSessionId);
+            }catch(BrowserStackException aex) {
               exceptionEncountered = aex.toString();
-            } catch (SessionNotFound snfEx) {
-              exceptionEncountered = snfEx.toString();
             }
 
             bStackSessions.add(new BStackSession(testCase, bStackSessionId, activeSession, exceptionEncountered));
@@ -149,5 +145,4 @@ public class BStackJUnitSessionMapper {
     }
     return testCases;
   }
-
 }
