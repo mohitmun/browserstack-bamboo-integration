@@ -16,9 +16,12 @@ import org.w3c.dom.NodeList;
 import java.util.HashMap;
 import com.browserstack.automate.model.Session;
 import com.browserstack.bamboo.ci.lib.BStackDirectoryScanner;
-import com.browserstack.client.exception.BrowserStackException;
-import com.browserstack.client.BrowserStackClient;
-
+import com.browserstack.automate.AutomateClient;
+import com.browserstack.appautomate.AppAutomateClient;
+import com.browserstack.automate.exception.AutomateException;
+import com.browserstack.automate.exception.SessionNotFound;
+import com.browserstack.bamboo.ci.lib.BStackDirectoryScanner;
+import com.browserstack.automate.exception.AppAutomateException;
 
 
 /*
@@ -31,16 +34,18 @@ import com.browserstack.client.BrowserStackClient;
 public class BStackJUnitSessionMapper {
 
   private String baseDir;
-  private Map<String, String> testSessionMap;
-  private BrowserStackClient bStackClient;
+  private Map<String, BStackXMLReport> testSessionMap;
+  private AutomateClient automateClient;
+  private AppAutomateClient appAutomateClient;
   public List<BStackSession> bStackSessions;
   private static final String pattern = "**/surefire-reports/TEST-*.xml";
 
-  public BStackJUnitSessionMapper(String baseDir, Map<String, String> testSessionMap, BrowserStackClient bStackClient) {
+  public BStackJUnitSessionMapper(String baseDir, Map<String, BStackXMLReport> testSessionMap, AutomateClient automateClient, AppAutomateClient appAutomateClient) {
     this.baseDir = baseDir;
     this.testSessionMap = testSessionMap;
     this.bStackSessions = new ArrayList<BStackSession>();
-    this.bStackClient = bStackClient;
+    this.automateClient = automateClient;
+    this.appAutomateClient = appAutomateClient;
   }
 
   public List<BStackSession> parseAndMapJUnitXMLReports() {
@@ -80,16 +85,23 @@ public class BStackJUnitSessionMapper {
 
         if (testSessionMap.containsKey(testId)) {
             Session activeSession = null;
-            String bStackSessionId = testSessionMap.get(testId);
+            BStackXMLReport bStackXMLReport = testSessionMap.get(testId);
             String exceptionEncountered = "";
 
             try {
-                activeSession = bStackClient.getSession(bStackSessionId);
-            }catch(BrowserStackException aex) {
+              if(bStackXMLReport.isAutomateReport()){
+                activeSession = automateClient.getSession(bStackXMLReport.sessionId);
+              }else{
+                activeSession = appAutomateClient.getSession(bStackXMLReport.sessionId);
+              }
+            } catch (AutomateException aex) {
               exceptionEncountered = aex.toString();
+            } catch (AppAutomateException appAutomateException) {
+              exceptionEncountered = appAutomateException.toString();
+            } catch (SessionNotFound snfEx) {
+              exceptionEncountered = snfEx.toString();
             }
-
-            bStackSessions.add(new BStackSession(testCase, bStackSessionId, activeSession, exceptionEncountered));
+           bStackSessions.add(new BStackSession(testCase, bStackXMLReport.sessionId, activeSession, exceptionEncountered));
         }
       }
     }

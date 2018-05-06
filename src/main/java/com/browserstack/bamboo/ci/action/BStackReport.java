@@ -81,15 +81,16 @@ public class BStackReport extends ViewBuildResults {
 
       BStackConfigManager configManager = new BStackConfigManager(administrationConfigurationAccessor.getAdministrationConfiguration(), job.getBuildDefinition().getCustomConfiguration(), bandanaManager);
       AutomateClient automateClient = null;
-
+      AppAutomateClient appAutomateClient = null;
       if(configManager.hasCredentials()) {
         automateClient = new AutomateClient(configManager.getUsername(), configManager.getAccessKey());
+        appAutomateClient = new AppAutomateClient(configManager.getUsername(), configManager.getAccessKey());
       }
 
       if (automateClient != null) {
         BStackXMLReportParser bStackParser = new BStackXMLReportParser(directoryToScan);
         bStackParser.process();
-        BStackJUnitSessionMapper sessionMapper = new BStackJUnitSessionMapper(directoryToScan, bStackParser.getTestSessionMap(), automateClient);
+        BStackJUnitSessionMapper sessionMapper = new BStackJUnitSessionMapper(directoryToScan, bStackParser.getTestSessionMap(), automateClient, appAutomateClient);
 
         bStackSessions.addAll(sessionMapper.parseAndMapJUnitXMLReports());
       } 
