@@ -26,12 +26,12 @@ import com.browserstack.bamboo.ci.lib.BStackDirectoryScanner;
 public class BStackXMLReportParser {
 
     private String baseDir;
-    private Map<String, String> testSessionMap;
+    private Map<String, BStackXMLReport> testSessionMap;
     private static final String pattern = "**/browserstack-reports/REPORT-*.xml";
 
     public BStackXMLReportParser(String baseDir) {
         this.baseDir = baseDir;
-        this.testSessionMap = new HashMap<String, String>();
+        this.testSessionMap = new HashMap<String, BStackXMLReport>();
     }
 
     public void process() {
@@ -44,7 +44,7 @@ public class BStackXMLReportParser {
         }
 
         for(String filePath : bStackreports) {
-            Map<String, String> parsedIds = null;
+            Map<String, BStackXMLReport> parsedIds = null;
 
             try {
                 parsedIds = parse(filePath);
@@ -58,10 +58,10 @@ public class BStackXMLReportParser {
         }
     }
 
-    private Map<String, String> parse(String pathToFile) throws IOException {
+    private Map<String, BStackXMLReport> parse(String pathToFile) throws IOException {
         File f = new File(baseDir + "/" + pathToFile);
 
-        Map<String, String> testSessionMap = new HashMap<String, String>();
+        Map<String, BStackXMLReport> testSessionMap = new HashMap<String, BStackXMLReport>();
         Document doc;
 
         try {
@@ -83,8 +83,14 @@ public class BStackXMLReportParser {
                 if (el.hasAttribute("id") && el.hasChildNodes()) {
                     String testId = el.getAttribute("id");
                     NodeList sessionNode = el.getElementsByTagName("session");
+                    NodeList projectTypeNode = el.getElementsByTagName("projectType");
+                    String projectType = null;
+                    if (projectTypeNode.getLength() > 0 && projectTypeNode.item(0).getNodeType() == Node.ELEMENT_NODE){
+                      projectType = projectTypeNode.item(0).getTextContent();
+                    }
                     if (sessionNode.getLength() > 0 && sessionNode.item(0).getNodeType() == Node.ELEMENT_NODE) {
-                        testSessionMap.put(testId, sessionNode.item(0).getTextContent());
+                      String sessionId = sessionNode.item(0).getTextContent();
+                      testSessionMap.put(testId, new BStackXMLReport(sessionId, projectType));
                     }
                 }
             }
@@ -92,7 +98,7 @@ public class BStackXMLReportParser {
         return testSessionMap;
     }
 
-    public Map<String,String> getTestSessionMap() {
+    public Map<String,BStackXMLReport> getTestSessionMap() {
         return testSessionMap;
     }
 }
